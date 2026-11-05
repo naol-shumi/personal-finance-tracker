@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Personal Finance Tracker</h1>
+    <p>Record your income and expenses in one place.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- Summary cards -->
+    <section class="summary">
+      <div class="card income">
+        <span class="card-label">Total income</span>
+        <span class="card-value" id="total-income">ETB 0.00</span>
+      </div>
+      <div class="card expense">
+        <span class="card-label">Total expenses</span>
+        <span class="card-value" id="total-expenses">ETB 0.00</span>
+      </div>
+      <div class="card">
+        <span class="card-label">Net change</span>
+        <span class="card-value" id="net-change">ETB 0.00</span>
+      </div>
+      <div class="card">
+        <span class="card-label">Transactions</span>
+        <span class="card-value" id="transaction-count">0</span>
+      </div>
+    </section>
+    <p class="hint">Net change is income minus expenses. It is not your account balance.</p>
+
+    <!-- Input methods -->
+    <section class="panel">
+      <div class="tabs">
+        <button class="tab-button active" data-tab="message-tab">Paste message</button>
+        <button class="tab-button" data-tab="manual-tab">Enter manually</button>
+      </div>
+
+      <!-- Tab 1: message -->
+      <div class="tab-panel active" id="message-tab">
+        <form id="message-form" novalidate>
+          <label for="message-input">Paste your bank or mobile money message</label>
+          <textarea id="message-input" rows="5"
+            placeholder="Paste the transaction message here..."></textarea>
+
+          <div class="samples">
+            <span class="samples-label">Try a fictional sample:</span>
+            <button type="button" class="row-btn sample-btn" data-sample="0">Bank credit</button>
+            <button type="button" class="row-btn sample-btn" data-sample="1">Bank debit</button>
+            <button type="button" class="row-btn sample-btn" data-sample="2">Money received</button>
+            <button type="button" class="row-btn sample-btn" data-sample="3">Money sent</button>
+            <button type="button" class="row-btn sample-btn" data-sample="4">Unclear message</button>
+          </div>
+
+          <p class="error" id="message-error"></p>
+          <button type="submit" class="btn">Analyze message</button>
+        </form>
+
+        <!-- Review step: shown after analyzing -->
+        <form id="review-form" class="review" novalidate hidden>
+          <h3>Review before saving</h3>
+          <ul class="warning" id="review-warning"></ul>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="review-type">Type</label>
+              <select id="review-type">
+                <option value="">Choose...</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="review-amount">Amount</label>
+              <input type="number" id="review-amount" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="review-currency">Currency</label>
+              <select id="review-currency">
+                <option value="ETB">ETB (Ethiopian birr)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="review-date">Date</label>
+              <input type="date" id="review-date">
+            </div>
+            <div class="field wide">
+              <label for="review-description">Description or category</label>
+              <input type="text" id="review-description">
+            </div>
+            <div class="field wide">
+              <label for="review-reference">Reference number (used to detect duplicates)</label>
+              <input type="text" id="review-reference">
+            </div>
+            <div class="field wide">
+              <label for="review-notes">Notes (optional)</label>
+              <textarea id="review-notes" rows="2"></textarea>
+            </div>
+          </div>
+
+          <p class="error" id="review-error"></p>
+          <button type="submit" class="btn">Save transaction</button>
+          <button type="button" class="btn secondary" id="cancel-review">Cancel</button>
+        </form>
+      </div>
+
+      <!-- Tab 2: manual -->
+      <div class="tab-panel" id="manual-tab">
+        <form id="manual-form" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="type">Type</label>
+              <select id="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="amount">Amount</label>
+              <input type="number" id="amount" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="currency">Currency</label>
+              <select id="currency">
+                <option value="ETB">ETB (Ethiopian birr)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="date">Date</label>
+              <input type="date" id="date">
+            </div>
+            <div class="field wide">
+              <label for="description">Description or category</label>
+              <input type="text" id="description" placeholder="e.g. Salary, Groceries">
+            </div>
+            <div class="field wide">
+              <label for="notes">Notes (optional)</label>
+              <textarea id="notes" rows="2"></textarea>
+            </div>
+          </div>
+          <p class="error" id="manual-error"></p>
+          <button type="submit" class="btn" id="manual-submit">Add transaction</button>
+          <button type="button" class="btn secondary" id="cancel-edit" hidden>Cancel edit</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Transaction history -->
+    <section class="panel">
+      <h2>Transaction history</h2>
+      <div class="filters">
+        <input type="search" id="search" placeholder="Search description or notes...">
+        <select id="filter-type">
+          <option value="all">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-body">
+            <tr>
+              <td colspan="5" class="empty">No transactions yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="parser.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
